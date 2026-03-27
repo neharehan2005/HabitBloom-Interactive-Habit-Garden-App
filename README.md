@@ -34,7 +34,7 @@ The app combines **habit management, streak tracking, and motivation** with an i
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/<your-username>/HabitBloom.git
+git clone https://github.com/neharehan2005/HabitBloom-Interactive-Habit-Garden-App.git
 cd HabitBloom
 ```
 
