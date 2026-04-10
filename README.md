@@ -151,6 +151,14 @@ HabitBloom/
 ├── package.json
 └── README.md
 ```
+## 📸 App Preview
+
+<p align="center">
+  <img src="assets/signUp.jpeg" width="200"/>
+  <img src="assets/LogIn.jpeg" width="200"/>
+  <img src="assets/MainGardenScreen.jpeg" width="200"/>
+</p>
+
 
 ---
 
