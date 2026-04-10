@@ -168,7 +168,7 @@ Below is the complete user journey of HabitBloom from authentication to habit tr
 
 ### 🌿 2. Main Garden (Home Screen)
 
-## Night View
+### Night View
 <p align="center">
   <img src="assets/images/MainGardenScreen.jpeg" width="200"/>
 </p>
@@ -192,7 +192,7 @@ Below is the complete user journey of HabitBloom from authentication to habit tr
 <p align="center">
   <img src="assets/images/ListOfHabits.jpeg" width="200"/>
   <img src="assets/images/HabitDetail.jpeg" width="200"/>
- <img src="assets/images/HabitDetail2.jpeg" width="200"/>
+ 
 </p>
 
 
