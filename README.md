@@ -154,9 +154,9 @@ HabitBloom/
 ## 📸 App Preview
 
 <p align="center">
-  <img src="assets/signUp.jpeg" width="200"/>
-  <img src="assets/LogIn.jpeg" width="200"/>
-  <img src="assets/MainGardenScreen.jpeg" width="200"/>
+  <img src="assets/images/SignUp.jpeg" width="200"/>
+  <img src="assets/images/LogIn.jpeg" width="200"/>
+  <img src="assets/images/MainGardenScreen.jpeg" width="200"/>
 </p>
 
 
