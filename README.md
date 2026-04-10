@@ -157,6 +157,10 @@ HabitBloom/
   <img src="assets/images/SignUp.jpeg" width="200"/>
   <img src="assets/images/LogIn.jpeg" width="200"/>
   <img src="assets/images/MainGardenScreen.jpeg" width="200"/>
+ <img src="assets/images/AddHabit.jpeg" width="200"/>
+ <img src="assets/images/HabitDetail.jpeg" width="200"/>
+ <img src="assets/images/ProfileScreen.jpeg" width="200"/>
+ <img src="assets/images/GardenStatsScreen.jpeg" width="200"/>
 </p>
 
 
