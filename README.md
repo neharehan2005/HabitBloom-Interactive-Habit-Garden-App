@@ -209,11 +209,10 @@ Below is the complete user journey of HabitBloom from authentication to habit tr
 
 ### 👤 6. Profile Screen
 
-```html
 <p align="center">
   <img src="assets/images/ProfileScreen.jpeg" width="200"/>
 </p>
-```
+
 
 ---
 
