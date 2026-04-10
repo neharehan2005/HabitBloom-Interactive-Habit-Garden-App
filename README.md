@@ -151,17 +151,71 @@ HabitBloom/
 ├── package.json
 └── README.md
 ```
-## 📸 App Preview
+## 📱 App Preview (User Flow)
 
+Below is the complete user journey of HabitBloom from authentication to habit tracking and analytics.
+
+### 🔐 1. Authentication Flow
+
+```html
 <p align="center">
   <img src="assets/images/SignUp.jpeg" width="200"/>
   <img src="assets/images/LogIn.jpeg" width="200"/>
-  <img src="assets/images/MainGardenScreen.jpeg" width="200"/>
- <img src="assets/images/AddHabit.jpeg" width="200"/>
- <img src="assets/images/HabitDetail.jpeg" width="200"/>
- <img src="assets/images/ProfileScreen.jpeg" width="200"/>
- <img src="assets/images/GardenStatsScreen.jpeg" width="200"/>
 </p>
+```
+
+---
+
+### 🌿 2. Main Garden (Home Screen)
+
+```html
+<p align="center">
+  <img src="assets/images/MainGardenScreen.jpeg" width="200"/>
+</p>
+```
+
+---
+
+### ➕ 3. Habit Creation Flow
+
+```html
+<p align="center">
+  <img src="assets/images/AddHabit.jpeg" width="200"/>
+</p>
+```
+
+---
+
+### 📋 4. Habit Tracking Flow
+
+```html
+<p align="center">
+  <img src="assets/images/ListOfHabits.jpeg" width="200"/>
+  <img src="assets/images/HabitDetail.jpeg" width="200"/>
+</p>
+```
+
+---
+
+### 📊 5. Stats & Analytics
+
+```html
+<p align="center">
+  <img src="assets/images/GardenStatsScreen.jpeg" width="200"/>
+</p>
+```
+
+---
+
+### 👤 6. Profile Screen
+
+```html
+<p align="center">
+  <img src="assets/images/ProfileScreen.jpeg" width="200"/>
+</p>
+```
+
+---
 
 
 ---
