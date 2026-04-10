@@ -1,4 +1,5 @@
 import React, { createContext, useState, ReactNode } from 'react';
+import { useContext } from 'react';
 
 type Theme = {
   name: string;
@@ -6,6 +7,8 @@ type Theme = {
   primary: string;
   motivationBg: string;
   textContrast: string;
+  tab: string,
+  tabInactive: string
 };
 
 type ThemeContextType = {
@@ -13,33 +16,34 @@ type ThemeContextType = {
   setSelectedTheme: (theme: Theme) => void;
   themes: Theme[];
 };
-
 export const ThemeContext = createContext<ThemeContextType | null>(null);
 
 const themes: Theme[] = [
   {
     name: 'Warm',
-    tab: '#16724f',
-    tabInactive: '#5eaf90',
+    tab: '#344E41',
+    tabInactive: '#9BAF9D',
     bg: '#fcf6ed',
-    primary: '#F4511E',
+    primary: '#fd6f43',
     motivationBg: '#ffffff',
     textContrast: '#B71C1C',
-    
+
   },
+
   {
-    name: 'Calm',
-    tab: '#F4511E',
-    tabInactive: '#df8469',
-    bg: '#eff8fd',
-    primary: '#1976D2',
-    motivationBg: '#ffffff',
-    textContrast: '#0D47A1',
+    name: 'Moss',
+    tab: '#344E41',
+    tabInactive: '#9BAF9D',
+    bg: '#F1F5F2',
+    primary: '#3A5A40',
+    motivationBg: '#FFFFFF',
+    textContrast: '#1B2B1E',
   },
+
   {
     name: 'Nature',
-    tab: '#4187ce',
-    tabInactive: '#87a6c5',
+    tab: '#344E41',
+    tabInactive: '#9BAF9D',
     bg: '#f1fdf5',
     primary: '#2E7D32',
     motivationBg: '#ffffff',

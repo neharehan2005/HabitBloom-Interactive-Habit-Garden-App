@@ -1,7 +1,7 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native'; 
+import { useColorScheme } from 'react-native';
 import { useContext } from 'react';
 import { ThemeContext } from '../../components/ThemeContext';
 
@@ -23,16 +23,24 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: selectedTheme.tab,       
-        tabBarInactiveTintColor: selectedTheme.tabInactive, 
+        tabBarActiveTintColor: selectedTheme.tab,
+        tabBarInactiveTintColor: selectedTheme.tabInactive,
         tabBarStyle: {
-          backgroundColor: selectedTheme.bg,               
+          backgroundColor: selectedTheme.bg,
           borderTopWidth: 1,
-          borderTopColor: selectedTheme.primary,          
+          borderTopColor: selectedTheme.primary,
         },
       }}
     >
-
+      <Tabs.Screen
+        name="gardenscreen"
+        options={{
+          title: 'Garden',
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="home" color={color} />
+          )
+        }}
+      />
       <Tabs.Screen
         name="index"
         options={{
@@ -48,16 +56,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="line-chart" color={color} />,
         }}
       />
-       {/* Stats */}
-      <Tabs.Screen
-        name="stats"
-        options={{
-          title: 'Stats',
-          tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart" color={color} />,
-        }}
-      />
 
-      {/* Profile */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -66,6 +65,5 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-
   );
 }
