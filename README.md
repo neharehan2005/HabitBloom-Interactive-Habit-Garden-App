@@ -176,8 +176,8 @@ Below is the complete user journey of HabitBloom from authentication to habit tr
 
 ### Morning View
 <p align="center">
-  <img src="assets/images/GardenScreen3.jpeg" width="200"/>
- <img src="assets/images/GardenScreen4.jpeg" width="200"/>
+  <img src="assets/images/GardenScreen4.jpeg" width="200"/>
+ <img src="assets/images/GardenScreen3.jpeg" width="200"/>
 </p>
 
 ---
