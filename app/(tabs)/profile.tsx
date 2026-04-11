@@ -101,8 +101,10 @@ export default function ProfileScreen() {
   }, []);
 
   const stats = useMemo(() => {
-    const totalHabits = habits.length;
-    const completedHabits = habits.filter(h => h.streak >= h.duration).length;
+    const activeHabits = habits.filter(h => h.streak < h.duration);
+    const bloomedHabits = habits.filter(h => h.streak >= h.duration);
+    const totalHabits = activeHabits.length;
+    const completedHabits = bloomedHabits.length;
     const bestStreak = habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0;
     const totalStreaks = habits.reduce((sum, h) => sum + (h.streak || 0), 0);
     return { totalHabits, completedHabits, bestStreak, totalStreaks };
@@ -179,9 +181,9 @@ export default function ProfileScreen() {
         <View style={styles.statsGrid}>
           {[
             { value: stats.totalHabits, label: 'Active' },
-            { value: stats.completedHabits, label: 'Done' },
+            { value: stats.completedHabits, label: 'Bloomed' },
             { value: stats.bestStreak, label: 'Best' },
-            { value: stats.totalStreaks, label: 'Total' },
+            { value: stats.totalStreaks, label: 'Streaks' },
           ].map(s => (
             <View key={s.label} style={styles.statCard}>
               <Text style={[styles.statValue, { color: selectedTheme.primary }]}>{s.value}</Text>
