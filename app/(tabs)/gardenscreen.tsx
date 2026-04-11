@@ -376,13 +376,14 @@ export default function GardenScreen() {
 
     const theme = THEMES[weather];
     const today = new Date().toISOString().split('T')[0];
-    const done = habits.filter((h: any) => h.lastWateredDate === today).length;
+    const activeHabits = habits.filter((h: any) => getGrowthStage(h.streak || 0, h.duration || 1) < 4);
+    const done = activeHabits.filter((h: any) => h.lastWateredDate === today).length;
 
     const healthLabel =
-        habits.length === 0 ? 'Empty 🪴' :
-            done === 0 ? 'Sleeping 😴' :
-                done < 3 ? 'Growing 🌱' :
-                    done < habits.length ? 'Thriving 🌿' : 'Blooming 🌸';
+    activeHabits.length === 0 ? 'Blooming 🌸' :
+        done === 0 ? 'Sleeping 😴' :
+            done < 3 ? 'Growing 🌱' :
+                done < activeHabits.length ? 'Thriving 🌿' : 'Blooming 🌸';
 
     return (
         <View style={styles.root}>
@@ -448,7 +449,7 @@ export default function GardenScreen() {
                         </View>
                         <View style={styles.statusRight}>
                             <Text style={styles.statusLabel}>WATERED TODAY</Text>
-                            <Text style={[styles.statusValue, { color: theme.accent }]}>{done}/{habits.length}</Text>
+                           <Text style={[styles.statusValue, { color: theme.accent }]}>{done}/{activeHabits.length}</Text>
                         </View>
                     </View>
                     <View style={styles.progressBg}>
@@ -465,9 +466,15 @@ export default function GardenScreen() {
                             ? '🪴 Add a habit to start your garden'
                             : done === 0
                                 ? '💤 Water a plant to begin your day'
-                                : done === habits.length
+                                :  done === activeHabits.length
                                     ? '🎉 All plants watered — amazing streak!'
-                                    : `${habits.length - done} plant${habits.length - done !== 1 ? 's' : ''} still need attention`}
+                                    : `${habits.filter((h: any) => {
+                                        const stage = getGrowthStage(h.streak || 0, h.duration || 1);
+                                        return h.lastWateredDate !== today && stage < 4;
+                                    }).length} plant${habits.filter((h: any) => {
+                                        const stage = getGrowthStage(h.streak || 0, h.duration || 1);
+                                        return h.lastWateredDate !== today && stage < 4;
+                                    }).length !== 1 ? 's' : ''} still need attention`}
                     </Text>
                 </BlurView>
 
@@ -483,16 +490,14 @@ export default function GardenScreen() {
                         <Text style={styles.emptySub}>Go to the Habits tab and add your first habit to see it grow here!</Text>
                     </BlurView>
                 )}
-
                 {habits.length > 0 && (
                     <View style={styles.plantGrid}>
-                        {habits.map((habit: any, i: number) => {
+                        {habits.filter((habit: any) => getGrowthStage(habit.streak || 0, habit.duration || 1) < 4).map((habit: any, i: number) => {
                             const streak = habit.streak || 0;
                             const duration = habit.duration || 1;
                             const growthStage = getGrowthStage(streak, duration);
                             const wateredToday = habit.lastWateredDate === today;
                             const isBloomed = growthStage === 4;
-
                             return (
                                 <PlantCard
                                     key={habit.id}
@@ -509,6 +514,28 @@ export default function GardenScreen() {
                     </View>
                 )}
 
+                {habits.some((h: any) => getGrowthStage(h.streak || 0, h.duration || 1) === 4) && (
+                    <>
+                        <View style={styles.sectionHeader}>
+                            <View style={[styles.sectionAccentLine, { backgroundColor: '#FFD166' }]} />
+                            <Text style={styles.sectionTitle}>Bloomed Plants</Text>
+                        </View>
+                        <View style={styles.plantGrid}>
+                            {habits.filter((habit: any) => getGrowthStage(habit.streak || 0, habit.duration || 1) === 4).map((habit: any, i: number) => (
+                                <PlantCard
+                                    key={habit.id}
+                                    plant={{ name: habit.name, growthStage: 4 }}
+                                    onWater={() => water(habit)}
+                                    accent="#FFD166"
+                                    accentGlow="#FF9A3C"
+                                    staggerDelay={i * 90 + 300}
+                                    wateredToday={habit.lastWateredDate === today}
+                                    isBloomed={true}
+                                />
+                            ))}
+                        </View>
+                    </>
+                )}
                 <BlurView intensity={14} tint="dark" style={styles.quoteCard}>
                     <Text style={[styles.quoteIcon, { color: theme.accent }]}>✦</Text>
                     <Text style={styles.quoteText}>"A garden is a friend you can visit any time."</Text>
