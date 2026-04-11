@@ -62,6 +62,7 @@ export default function LoginScreen() {
           <Text style={styles.heroTitle}>Welcome{'\n'}back</Text>
         </View>
         <Text style={styles.heroSub}>Your habits. Your growth. Your garden.</Text>
+        <Text style={[styles.heroSub,{fontSize:30},{marginTop:0},{padding:0},{textAlign:'center'},{fontWeight:800}]}>{'\n'}✦ Habit Garden ✦</Text>
       </View>
 
       <View style={styles.body}>
