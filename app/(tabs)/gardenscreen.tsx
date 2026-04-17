@@ -336,7 +336,7 @@ export default function GardenScreen() {
     const fetchWeather = async () => {
         try {
             const response = await fetch(
-                'https://api.weatherapi.com/v1/current.json?key=e0894036aa524cf7be1125045262903&q=Karachi,Pakistan'
+                'https://api.weatherapi.com/v1/current.json?key=d37e8107d634483e992125505261204&q=Karachi,Pakistan'
             );
             const data = await response.json();
             const cond = data?.current?.condition?.text || '';
