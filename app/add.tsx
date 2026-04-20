@@ -7,16 +7,13 @@ import { ThemeContext } from '../components/ThemeContext';
 import { db } from '../firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 
-// ── Growth preview: emoji bounces when duration changes ──────────
+
+// ── Growth preview: emoji bounces ──────────
 function GrowthPreview({ duration }: { duration: number }) {
   const scale = useRef(new Animated.Value(1)).current;
 
   const getStage = () => {
-    if (duration >= 100) return { emoji: '🌸', label: 'Champion bloom' };
-    if (duration >= 75) return { emoji: '🌳', label: 'Mighty tree' };
-    if (duration >= 50) return { emoji: '🌿', label: 'Leafy sprout' };
-    if (duration >= 0) return { emoji: '🌱', label: 'First seedling' };
-    return { emoji: '🪴', label: 'Baby plant' };
+    return { emoji: '🌱', label: 'First seedling' };
   };
 
   useEffect(() => {
@@ -94,7 +91,7 @@ export default function AddHabitScreen() {
   if (!themeContext) return null;
   const { selectedTheme } = themeContext;
 
-  // ── Logic completely unchanged ───────────────────────────────
+  // ── Logic  ───────────────────────────────
   const handleSave = async () => {
     if (!name || !duration || !uid) return;
 

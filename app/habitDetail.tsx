@@ -15,21 +15,21 @@ export default function HabitDetail() {
   const habits = useSelector((state: any) => state.habits.habits);
 
   // Animations
-  const fadeIn    = useRef(new Animated.Value(0)).current;
-  const slideUp   = useRef(new Animated.Value(40)).current;
-  const barWidth  = useRef(new Animated.Value(0)).current;
+  const fadeIn = useRef(new Animated.Value(0)).current;
+  const slideUp = useRef(new Animated.Value(40)).current;
+  const barWidth = useRef(new Animated.Value(0)).current;
   const plantScale = useRef(new Animated.Value(0.6)).current;
   const plantRotate = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeIn,  { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
       Animated.spring(slideUp, { toValue: 0, useNativeDriver: true }),
-      Animated.spring(plantScale,  { toValue: 1, friction: 5, useNativeDriver: true }),
+      Animated.spring(plantScale, { toValue: 1, friction: 5, useNativeDriver: true }),
       Animated.sequence([
         Animated.timing(plantRotate, { toValue: -0.04, duration: 200, useNativeDriver: true }),
-        Animated.timing(plantRotate, { toValue: 0.04,  duration: 200, useNativeDriver: true }),
-        Animated.timing(plantRotate, { toValue: 0,     duration: 200, useNativeDriver: true }),
+        Animated.timing(plantRotate, { toValue: 0.04, duration: 200, useNativeDriver: true }),
+        Animated.timing(plantRotate, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]),
     ]).start();
   }, []);
@@ -55,20 +55,20 @@ export default function HabitDetail() {
 
   const getPlantStage = () => {
     if (progress >= 100) return { emoji: '🌸', label: 'Fully Bloomed', color: '#FF6B9D' };
-    if (progress >= 75)  return { emoji: '🌳', label: 'Thriving',      color: '#52B788' };
-    if (progress >= 50)  return { emoji: '🌿', label: 'Growing',       color: '#74C69D' };
-    return                      { emoji: '🌱', label: 'Sprouting',     color: '#95D5B2' };
+    if (progress >= 75) return { emoji: '🌳', label: 'Thriving', color: '#52B788' };
+    if (progress >= 50) return { emoji: '🌿', label: 'Growing', color: '#74C69D' };
+    return { emoji: '🌱', label: 'Sprouting', color: '#95D5B2' };
   };
 
   const getStatus = () => {
     if (habit.streak >= habit.duration)
       return { label: 'Goal Achieved', emoji: '🏆', colors: ['#F9A825', '#FF6F00'] as const };
     if (progress >= 60)
-      return { label: 'On Track',      emoji: '🚀', colors: [primary, '#1B4332'] as const };
-    return   { label: 'Keep Growing',  emoji: '💪', colors: ['#E63946', '#C1121F'] as const };
+      return { label: 'On Track', emoji: '🚀', colors: [primary, '#1B4332'] as const };
+    return { label: 'Keep Growing', emoji: '💪', colors: ['#E63946', '#C1121F'] as const };
   };
 
-  const plant  = getPlantStage();
+  const plant = getPlantStage();
   const status = getStatus();
 
   const timeline = Array.from(
@@ -167,7 +167,7 @@ export default function HabitDetail() {
             <Text style={styles.statLbl}>Day Streak</Text>
           </View>
 
-          <View style={[styles.statCard, {  backgroundColor: '#FFF8E1' }]}>
+          <View style={[styles.statCard, { backgroundColor: '#FFF8E1' }]}>
             <Text style={styles.statEmoji}>🎯</Text>
             <Text style={[styles.statNum, { color: primary }]}>{habit.duration}</Text>
             <Text style={styles.statLbl}>Day Goal</Text>

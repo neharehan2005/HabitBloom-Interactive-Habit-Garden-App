@@ -8,25 +8,18 @@ import { router } from 'expo-router';
 import { ThemeContext } from '../../components/ThemeContext';
 import { deleteHabit, markProgress } from '../../store/habitSlice';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { db } from '../../firebaseConfig';           
-import { doc, deleteDoc } from 'firebase/firestore'; 
+import { db } from '../../firebaseConfig';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { getGrowthStage, STAGE_EMOJIS } from '../../utils/habitUtils';
 
 export default function Index() {
   const themeContext = useContext(ThemeContext);
   if (!themeContext) return null;
   const { selectedTheme } = themeContext;
-  const uid = useSelector((state: any) => state.habits.user?.uid); 
+  const uid = useSelector((state: any) => state.habits.user?.uid);
   const habits = useSelector((state: any) => state.habits.habits);
   const dispatch = useDispatch();
 
-  const getGrowthStage = (streak: number, duration: number) => {
-    const p = (streak / duration) * 100;
-    if (p >= 100) return '🌸';
-    if (p >= 75) return '🌳';
-    if (p >= 50) return '🌿';
-    if (p >= 0) return '🌱';
-    return '';
-  };
 
   const handleWaterPlant = (habit: any) => {
     const today = new Date().toISOString().split('T')[0];
@@ -46,7 +39,7 @@ export default function Index() {
   };
 
   // Replace handleDelete with this:
-  const handleDelete = async (habit: any) => {        
+  const handleDelete = async (habit: any) => {
     const doDelete = async () => {
       // 1️⃣ Remove from Redux
       dispatch(deleteHabit(habit.id));
@@ -86,7 +79,7 @@ export default function Index() {
 
         {/* Growth emoji */}
         <View style={styles.iconWrap}>
-          <Text style={styles.growthEmoji}>{getGrowthStage(streak, duration)}</Text>
+          <Text style={styles.growthEmoji}>{STAGE_EMOJIS[getGrowthStage(streak, duration) - 1] ?? '🌱'}</Text>
         </View>
 
         {/* Content */}

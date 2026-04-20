@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    Dimensions, Animated, Image, StatusBar,
+    Dimensions, Animated, Image, StatusBar, Platform, ActivityIndicator
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -9,6 +9,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { markProgress } from '../../store/habitSlice';
 import { db } from '../../firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
+import { fetchWeather } from '../../store/weatherSlice';
+import { getGrowthStage, STAGE_EMOJIS } from '../../utils/habitUtils';
 
 // ─── Greeting ─────────────────────────────────────────────────────────────────
 const getGreeting = () => {
@@ -20,6 +22,12 @@ const getGreeting = () => {
 };
 
 const { width, height } = Dimensions.get('window');
+const CARD_GAP = 12;
+const H_PAD = 16;
+const CARD_W = (width - H_PAD * 2 - CARD_GAP) / 2;
+
+const fz = (base: number, min = base * 0.8, max = base * 1.25) =>
+    Math.min(max, Math.max(min, (base / 390) * width));
 
 // ─── Weather theme tokens ─────────────────────────────────────────────────────
 const THEMES = {
@@ -63,42 +71,26 @@ const THEMES = {
 
 type WeatherType = keyof typeof THEMES;
 
-// ─── weather helper — covers morning/afternoon/evening/night/rainy/cloudy ────────
 const getLocalWeatherType = (conditionText: string): WeatherType => {
     const hour = new Date().getHours();
     const isMorning = hour >= 5 && hour < 12;
     const isAfternoon = hour >= 12 && hour < 17;
-    const isEvening = hour >= 17 && hour < 20; // 👈 evening slot
+    const isEvening = hour >= 17 && hour < 20;
     const isDay = isMorning || isAfternoon;
 
     const cond = conditionText.toLowerCase();
 
-    // Rain overrides time of day
     if (cond.includes('rain')) return 'rain';
 
-    // Cloudy — pick right variant
     if (cond.includes('cloud')) {
-        if (isEvening) return 'evening';    // evening clouds → warm tone
+        if (isEvening) return 'evening';
         return isDay ? 'cloud-day' : 'cloud';
     }
 
-    // Clear sky — pick by time slot
-    if (isEvening) return 'evening';      // 👈 evening gets its own theme
+    if (isEvening) return 'evening';
     if (isDay) return 'sunny';
     return 'night';
 };
-
-// ─── Map streak/duration → growthStage 1–5 ───────────────────────────────────
-const getGrowthStage = (streak: number, duration: number): number => {
-    const p = (streak / Math.max(duration, 1)) * 100;
-    if (p >= 100) return 4;
-    if (p >= 75) return 3;
-    if (p >= 50) return 2;
-    if (p >= 0) return 1;
-    return 0;
-};
-
-const STAGE_EMOJIS = ['🌱', '🌿', '🌳', '🌸'];
 
 // ─── Twinkling Star ───────────────────────────────────────────────────────────
 const Star = React.memo(({ x, y, size, delay }: { x: number; y: number; size: number; delay: number }) => {
@@ -261,18 +253,14 @@ const PlantCard = ({
             <TouchableOpacity onPressIn={onPressIn} onPressOut={onPressOut} onPress={onWater} disabled={isDisabled} activeOpacity={1}>
                 <BlurView intensity={18} tint="dark" style={styles.plantCard}>
                     <LinearGradient colors={[accentGlow + '18', 'transparent'] as any} style={StyleSheet.absoluteFill} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} />
-
                     <View style={[styles.stageBadge, { borderColor: accent + '55', backgroundColor: accent + '15' }]}>
                         <Text style={[styles.stageBadgeText, { color: accent }]}>Stage {plant.growthStage}/4</Text>
                     </View>
-
                     <View style={styles.plantEmojiWrap}>
                         <View style={[styles.plantEmojiGlow, { backgroundColor: accentGlow + '22' }]} />
                         <Text style={styles.plantEmojiText}>{emoji}</Text>
                     </View>
-
                     <Text style={styles.plantName} numberOfLines={1}>{plant.name}</Text>
-
                     <View style={styles.pipRow}>
                         {Array.from({ length: 4 }).map((_, s) => (
                             <LinearGradient
@@ -283,7 +271,6 @@ const PlantCard = ({
                             />
                         ))}
                     </View>
-
                     <TouchableOpacity onPress={onWater} disabled={isDisabled} style={[styles.waterBtn, { backgroundColor: btnBg, borderColor: btnBorder }]}>
                         <Text style={[styles.waterBtnText, { color: btnColor }]}>{btnLabel}</Text>
                     </TouchableOpacity>
@@ -297,12 +284,25 @@ const PlantCard = ({
 export default function GardenScreen() {
     const habits = useSelector((state: any) => state.habits.habits);
     const uid = useSelector((state: any) => state.habits.user?.uid);
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<any>();
 
     const [greeting, setGreeting] = useState(getGreeting());
-    const [weather, setWeather] = useState<WeatherType>(getLocalWeatherType(''));
-    const [weatherIcon, setWeatherIcon] = useState('');
-    const [temperature, setTemperature] = useState<string | null>(null);
+
+    // ── Weather from Redux ────────────────────────────────────────────────────
+    const apiData = useSelector((state: any) => state.weather.data);
+    const loading = useSelector((state: any) => state.weather.loading);
+    const error = useSelector((state: any) => state.weather.error);
+
+    // Derive all weather values directly from Redux state — no local state needed
+    const condition: string = apiData?.current?.condition?.text ?? '';
+    const temperature: string | null = apiData?.current?.temp_c != null
+        ? `${Math.round(apiData.current.temp_c)}°C`
+        : null;
+    const weatherIcon: string = apiData?.current?.condition?.icon ?? '';
+
+    // Derive theme type and theme object
+    const weather: WeatherType = getLocalWeatherType(condition);
+    const theme = THEMES[weather];
 
     const headerFade = useRef(new Animated.Value(0)).current;
     const headerSlide = useRef(new Animated.Value(-18)).current;
@@ -311,54 +311,34 @@ export default function GardenScreen() {
         Array.from({ length: 60 }, () => ({
             x: Math.random() * width, y: Math.random() * (height * 0.52),
             size: Math.random() * 2.5 + 0.8, delay: Math.random() * 4000,
-        }))
-        , []);
+        })), []);
 
     const fireflies = useMemo(() =>
-        Array.from({ length: 10 }, (_, i) => ({ delay: i * 700 }))
-        , []);
+        Array.from({ length: 10 }, (_, i) => ({ delay: i * 700 })), []);
 
     const rainDrops = useMemo(() =>
-        Array.from({ length: 25 }, (_, i) => ({ delay: i * 120, x: Math.random() * width }))
-        , []);
+        Array.from({ length: 25 }, (_, i) => ({ delay: i * 120, x: Math.random() * width })), []);
 
+    // ── Header animation + fetch weather on mount ─────────────────────────────
     useEffect(() => {
         Animated.parallel([
             Animated.timing(headerFade, { toValue: 1, duration: 900, delay: 150, useNativeDriver: true }),
             Animated.timing(headerSlide, { toValue: 0, duration: 700, delay: 150, useNativeDriver: true }),
         ]).start();
 
-        fetchWeather();
+        dispatch(fetchWeather());  // correctly dispatched
+
         const interval = setInterval(() => setGreeting(getGreeting()), 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [dispatch]);
 
-    const fetchWeather = async () => {
-        try {
-            const response = await fetch(
-                'https://api.weatherapi.com/v1/current.json?key=e0894036aa524cf7be1125045262903&q=Karachi,Pakistan'
-            );
-            const data = await response.json();
-            const cond = data?.current?.condition?.text || '';
-            const icon = data?.current?.condition?.icon || '';
-            const temp = data?.current?.temp_c != null ? `${Math.round(data.current.temp_c)}°C` : null;
-            setWeather(getLocalWeatherType(cond));
-            setWeatherIcon(icon);
-            if (temp) setTemperature(temp);
-        } catch (e) {
-            setWeather(getLocalWeatherType(''));
-        }
-    };
-
-    // ── Water — syncs Redux + Firestore ───────────────────────────
+    // ── Water — syncs Redux + Firestore ───────────────────────────────────────
     const water = async (habit: any) => {
         const today = new Date().toISOString().split('T')[0];
         if (habit.lastWateredDate === today || !uid) return;
 
-        // 1️⃣ Update Redux immediately
         dispatch(markProgress({ id: habit.id, date: today }));
 
-        // 2️⃣ Sync to Firestore so it persists
         if (habit.firestoreId) {
             try {
                 await updateDoc(
@@ -374,15 +354,15 @@ export default function GardenScreen() {
         }
     };
 
-    const theme = THEMES[weather];
     const today = new Date().toISOString().split('T')[0];
-    const done = habits.filter((h: any) => h.lastWateredDate === today).length;
+    const activeHabits = habits.filter((h: any) => getGrowthStage(h.streak || 0, h.duration || 1) < 4);
+    const done = activeHabits.filter((h: any) => h.lastWateredDate === today).length;
 
     const healthLabel =
-        habits.length === 0 ? 'Empty 🪴' :
+        activeHabits.length === 0 ? 'Blooming 🌸' :
             done === 0 ? 'Sleeping 😴' :
                 done < 3 ? 'Growing 🌱' :
-                    done < habits.length ? 'Thriving 🌿' : 'Blooming 🌸';
+                    done < activeHabits.length ? 'Thriving 🌿' : 'Blooming 🌸';
 
     return (
         <View style={styles.root}>
@@ -392,7 +372,6 @@ export default function GardenScreen() {
 
             {(weather === 'night' || weather === 'cloud') && stars.map((s, i) => <Star key={i} {...s} />)}
 
-            {/* Moon for night/cloud, Sun for day, Sunset glow for evening */}
             {(weather === 'night' || weather === 'cloud') && <Moon color={theme.moonColor} />}
             {(weather === 'sunny' || weather === 'cloud-day') && (
                 <View style={{ position: 'absolute', top: 50, right: 28 }}>
@@ -421,10 +400,14 @@ export default function GardenScreen() {
 
                 <Animated.View style={[styles.headerRow, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
                     <View style={{ flex: 1 }}>
+                        {loading && <ActivityIndicator size="small" color="#fff" />}
+                        {!!error && <Text style={{ color: 'red', fontSize: 12 }}>{error}</Text>}
                         <Text style={styles.greeting}>{greeting.text} {greeting.icon}</Text>
                         <Text style={styles.headerTitle}>My Garden</Text>
                         <Text style={styles.headerSub}>Nurture habits, grow your life</Text>
                     </View>
+
+                    {/* ── Weather chip ── */}
                     <BlurView intensity={22} tint="dark" style={styles.weatherChip}>
                         {weatherIcon
                             ? <Image source={{ uri: `https:${weatherIcon}` }} style={styles.weatherChipIcon} />
@@ -434,7 +417,9 @@ export default function GardenScreen() {
                         }
                         <View style={{ marginLeft: 6 }}>
                             <Text style={[styles.weatherChipLabel, { color: theme.accent }]}>{theme.label}</Text>
-                            {temperature && <Text style={styles.weatherChipTemp}>{temperature}</Text>}
+                            {temperature !== null && (
+                                <Text style={styles.weatherChipTemp}>{temperature}</Text>
+                            )}
                         </View>
                     </BlurView>
                 </Animated.View>
@@ -448,7 +433,7 @@ export default function GardenScreen() {
                         </View>
                         <View style={styles.statusRight}>
                             <Text style={styles.statusLabel}>WATERED TODAY</Text>
-                            <Text style={[styles.statusValue, { color: theme.accent }]}>{done}/{habits.length}</Text>
+                            <Text style={[styles.statusValue, { color: theme.accent }]}>{done}/{activeHabits.length}</Text>
                         </View>
                     </View>
                     <View style={styles.progressBg}>
@@ -465,9 +450,15 @@ export default function GardenScreen() {
                             ? '🪴 Add a habit to start your garden'
                             : done === 0
                                 ? '💤 Water a plant to begin your day'
-                                : done === habits.length
+                                : done === activeHabits.length
                                     ? '🎉 All plants watered — amazing streak!'
-                                    : `${habits.length - done} plant${habits.length - done !== 1 ? 's' : ''} still need attention`}
+                                    : `${habits.filter((h: any) => {
+                                        const stage = getGrowthStage(h.streak || 0, h.duration || 1);
+                                        return h.lastWateredDate !== today && stage < 4;
+                                    }).length} plant${habits.filter((h: any) => {
+                                        const stage = getGrowthStage(h.streak || 0, h.duration || 1);
+                                        return h.lastWateredDate !== today && stage < 4;
+                                    }).length !== 1 ? 's' : ''} still need attention`}
                     </Text>
                 </BlurView>
 
@@ -486,27 +477,49 @@ export default function GardenScreen() {
 
                 {habits.length > 0 && (
                     <View style={styles.plantGrid}>
-                        {habits.map((habit: any, i: number) => {
-                            const streak = habit.streak || 0;
-                            const duration = habit.duration || 1;
-                            const growthStage = getGrowthStage(streak, duration);
-                            const wateredToday = habit.lastWateredDate === today;
-                            const isBloomed = growthStage === 4;
-
-                            return (
-                                <PlantCard
-                                    key={habit.id}
-                                    plant={{ name: habit.name, growthStage }}
-                                    onWater={() => water(habit)}
-                                    accent={theme.accent}
-                                    accentGlow={theme.accentGlow}
-                                    staggerDelay={i * 90 + 300}
-                                    wateredToday={wateredToday}
-                                    isBloomed={isBloomed}
-                                />
-                            );
-                        })}
+                        {habits
+                            .filter((habit: any) => getGrowthStage(habit.streak || 0, habit.duration || 1) < 4)
+                            .map((habit: any, i: number) => {
+                                const growthStage = getGrowthStage(habit.streak || 0, habit.duration || 1);
+                                return (
+                                    <PlantCard
+                                        key={habit.id}
+                                        plant={{ name: habit.name, growthStage }}
+                                        onWater={() => water(habit)}
+                                        accent={theme.accent}
+                                        accentGlow={theme.accentGlow}
+                                        staggerDelay={i * 90 + 300}
+                                        wateredToday={habit.lastWateredDate === today}
+                                        isBloomed={growthStage === 4}
+                                    />
+                                );
+                            })}
                     </View>
+                )}
+
+                {habits.some((h: any) => getGrowthStage(h.streak || 0, h.duration || 1) === 4) && (
+                    <>
+                        <View style={styles.sectionHeader}>
+                            <View style={[styles.sectionAccentLine, { backgroundColor: '#FFD166' }]} />
+                            <Text style={styles.sectionTitle}>Bloomed Plants</Text>
+                        </View>
+                        <View style={styles.plantGrid}>
+                            {habits
+                                .filter((habit: any) => getGrowthStage(habit.streak || 0, habit.duration || 1) === 4)
+                                .map((habit: any, i: number) => (
+                                    <PlantCard
+                                        key={habit.id}
+                                        plant={{ name: habit.name, growthStage: 4 }}
+                                        onWater={() => water(habit)}
+                                        accent="#FFD166"
+                                        accentGlow="#FF9A3C"
+                                        staggerDelay={i * 90 + 300}
+                                        wateredToday={habit.lastWateredDate === today}
+                                        isBloomed={true}
+                                    />
+                                ))}
+                        </View>
+                    </>
                 )}
 
                 <BlurView intensity={14} tint="dark" style={styles.quoteCard}>
@@ -521,51 +534,136 @@ export default function GardenScreen() {
     );
 }
 
-// ─── Styles (unchanged) ───────────────────────────────────────────────────────
 const styles = StyleSheet.create({
     root: { flex: 1, backgroundColor: '#020510' },
-    ground: { position: 'absolute', bottom: 0, width: '148%', height: '44%', borderTopLeftRadius: 240, borderTopRightRadius: 240, alignSelf: 'center' },
-    horizonMist: { position: 'absolute', bottom: '38%', width: '100%', height: 60 },
-    treesRow: { position: 'absolute', bottom: '37%', width: '100%', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end' },
-    treeEmoji: { lineHeight: 36 },
-    scroll: { paddingTop: 58, paddingHorizontal: 18 },
-    headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, marginTop: 8 },
-    greeting: { fontSize: 12, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.6, marginBottom: 2, fontWeight: '500' },
-    headerTitle: { fontSize: 34, fontWeight: '800', color: '#fff', letterSpacing: -0.8, textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 },
-    headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.32)', marginTop: 3, fontStyle: 'italic' },
-    weatherChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginTop: 8 },
-    weatherChipIcon: { width: 28, height: 28 },
-    weatherChipLabel: { fontSize: 12, fontWeight: '700', letterSpacing: 0.2 },
-    weatherChipTemp: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 1 },
-    statusCard: { borderRadius: 24, overflow: 'hidden', padding: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', marginBottom: 26 },
-    statusRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
+
+    ground: {
+        position: 'absolute', bottom: 0, width: '148%', height: '44%',
+        borderTopLeftRadius: width * 0.6, borderTopRightRadius: width * 0.6,
+        alignSelf: 'center',
+    },
+    horizonMist: {
+        position: 'absolute', bottom: '38%', width: '100%', height: height * 0.07,
+    },
+    treesRow: {
+        position: 'absolute', bottom: '37%', width: '100%',
+        flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end',
+    },
+    treeEmoji: { lineHeight: height * 0.042 },
+
+    scroll: {
+        paddingTop: Platform.OS === 'ios' ? height * 0.07 : height * 0.06,
+        paddingHorizontal: H_PAD, paddingBottom: 20,
+    },
+
+    headerRow: {
+        flexDirection: 'row', alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: height * 0.025, marginTop: height * 0.01,
+    },
+    greeting: {
+        fontSize: fz(11, 10, 13), color: 'rgba(255,255,255,0.45)',
+        letterSpacing: 0.5, marginBottom: 2, fontWeight: '500',
+    },
+    headerTitle: {
+        fontSize: fz(30, 24, 36), fontWeight: '800', color: '#fff',
+        letterSpacing: -0.5, textShadowColor: 'rgba(0,0,0,0.6)',
+        textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8,
+    },
+    headerSub: {
+        fontSize: fz(11, 10, 13), color: 'rgba(255,255,255,0.32)',
+        marginTop: 3, fontStyle: 'italic',
+    },
+
+    weatherChip: {
+        flexDirection: 'row', alignItems: 'center',
+        paddingHorizontal: 10, paddingVertical: 8,
+        borderRadius: 14, overflow: 'hidden',
+        borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+        marginTop: 6, maxWidth: width * 0.35, flexShrink: 0,
+    },
+    weatherChipIcon: { width: 24, height: 24 },
+    weatherChipLabel: {
+        fontSize: fz(11, 9, 13), fontWeight: '700',
+        letterSpacing: 0.2, flexShrink: 1,
+    },
+    weatherChipTemp: {
+        fontSize: fz(10, 9, 12), color: 'rgba(255,255,255,0.4)', marginTop: 1,
+    },
+
+    statusCard: {
+        borderRadius: 20, overflow: 'hidden', padding: 16,
+        borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+        marginBottom: height * 0.03,
+    },
+    statusRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
     statusRight: { alignItems: 'flex-end' },
-    statusLabel: { fontSize: 10, color: 'rgba(255,255,255,0.32)', letterSpacing: 0.8, marginBottom: 4, fontWeight: '600' },
-    statusValue: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
-    progressBg: { width: '100%', height: 5, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden', marginBottom: 10 },
-    progressFill: { height: 5, borderRadius: 3, minWidth: 5 },
-    progressCaption: { fontSize: 11, color: 'rgba(255,255,255,0.32)', letterSpacing: 0.1 },
-    sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 10 },
+    statusLabel: {
+        fontSize: fz(9, 8, 11), color: 'rgba(255,255,255,0.32)',
+        letterSpacing: 0.7, marginBottom: 3, fontWeight: '600',
+    },
+    statusValue: { fontSize: fz(16, 14, 20), fontWeight: '800', letterSpacing: -0.3 },
+    progressBg: {
+        width: '100%', height: 5, backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 3, overflow: 'hidden', marginBottom: 8,
+    },
+    progressFill: { height: 5, borderRadius: 3, minWidth: 4 },
+    progressCaption: {
+        fontSize: fz(11, 10, 13), color: 'rgba(255,255,255,0.32)', letterSpacing: 0.1,
+    },
+
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
     sectionAccentLine: { width: 3, height: 18, borderRadius: 2 },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
-    emptyCard: { borderRadius: 20, overflow: 'hidden', padding: 32, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', alignItems: 'center', marginBottom: 22 },
-    emptyEmoji: { fontSize: 56, marginBottom: 12 },
-    emptyTitle: { fontSize: 18, fontWeight: '700', color: 'rgba(255,255,255,0.7)', marginBottom: 8 },
-    emptySub: { fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 20 },
-    plantGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginBottom: 22 },
-    plantCard: { borderRadius: 22, overflow: 'hidden', padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center' },
-    stageBadge: { alignSelf: 'flex-end', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, borderWidth: 1, marginBottom: 6 },
-    stageBadgeText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
-    plantEmojiWrap: { alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-    plantEmojiGlow: { position: 'absolute', width: 70, height: 70, borderRadius: 35 },
-    plantEmojiText: { fontSize: 56, zIndex: 1 },
-    plantName: { fontSize: 14, fontWeight: '700', color: '#fff', marginBottom: 8, letterSpacing: -0.1, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
-    pipRow: { flexDirection: 'row', gap: 4, marginBottom: 12 },
+    sectionTitle: { fontSize: fz(17, 15, 20), fontWeight: '700', color: '#fff', letterSpacing: -0.2 },
+
+    emptyCard: {
+        borderRadius: 18, overflow: 'hidden', padding: 28,
+        borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+        alignItems: 'center', marginBottom: 20,
+    },
+    emptyEmoji: { fontSize: fz(48, 40, 56), marginBottom: 10 },
+    emptyTitle: { fontSize: fz(16, 14, 18), fontWeight: '700', color: 'rgba(255,255,255,0.7)', marginBottom: 6 },
+    emptySub: {
+        fontSize: fz(12, 11, 14), color: 'rgba(255,255,255,0.35)',
+        textAlign: 'center', lineHeight: fz(12, 11, 14) * 1.6,
+    },
+
+    plantGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: CARD_GAP, marginBottom: 20 },
+
+    plantCard: {
+        borderRadius: 20, overflow: 'hidden', padding: 12,
+        borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center',
+    },
+    stageBadge: {
+        alignSelf: 'flex-end', paddingHorizontal: 7, paddingVertical: 3,
+        borderRadius: 7, borderWidth: 1, marginBottom: 5,
+    },
+    stageBadgeText: { fontSize: fz(9, 8, 11), fontWeight: '700', letterSpacing: 0.3 },
+    plantEmojiWrap: { alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+    plantEmojiGlow: {
+        position: 'absolute', width: CARD_W * 0.55, height: CARD_W * 0.55, borderRadius: CARD_W * 0.275,
+    },
+    plantEmojiText: { fontSize: Math.min(CARD_W * 0.45, 52), zIndex: 1 },
+    plantName: {
+        fontSize: fz(13, 11, 15), fontWeight: '700', color: '#fff',
+        marginBottom: 6, letterSpacing: -0.1,
+        textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4, textAlign: 'center',
+    },
+    pipRow: { flexDirection: 'row', gap: 3, marginBottom: 10, width: '100%' },
     pip: { flex: 1, height: 4, borderRadius: 2 },
-    waterBtn: { width: '100%', paddingVertical: 9, borderRadius: 12, alignItems: 'center', borderWidth: 1 },
-    waterBtnText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.3 },
-    quoteCard: { borderRadius: 20, overflow: 'hidden', padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', alignItems: 'center' },
-    quoteIcon: { fontSize: 14, marginBottom: 8 },
-    quoteText: { fontSize: 13, color: 'rgba(255,255,255,0.48)', textAlign: 'center', fontStyle: 'italic', lineHeight: 22, letterSpacing: 0.1 },
-    quoteAuthor: { fontSize: 11, color: 'rgba(255,255,255,0.22)', marginTop: 8, letterSpacing: 0.6 },
+    waterBtn: { width: '100%', paddingVertical: 8, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
+    waterBtnText: { fontSize: fz(11, 10, 13), fontWeight: '700', letterSpacing: 0.2 },
+
+    quoteCard: {
+        borderRadius: 18, overflow: 'hidden', padding: 18,
+        borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', alignItems: 'center',
+    },
+    quoteIcon: { fontSize: fz(13, 12, 16), marginBottom: 7 },
+    quoteText: {
+        fontSize: fz(12, 11, 14), color: 'rgba(255,255,255,0.48)',
+        textAlign: 'center', fontStyle: 'italic',
+        lineHeight: fz(12, 11, 14) * 1.7, letterSpacing: 0.1,
+    },
+    quoteAuthor: { fontSize: fz(10, 9, 12), color: 'rgba(255,255,255,0.22)', marginTop: 7, letterSpacing: 0.5 },
 });

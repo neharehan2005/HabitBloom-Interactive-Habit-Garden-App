@@ -55,6 +55,7 @@ export default function SignupScreen({ onBackToLogin }: Props) {
         </View>
         <Text style={styles.heroTitle}>Start growing</Text>
         <Text style={styles.heroSub}>Plant your first habit today.</Text>
+        <Text style={[styles.heroSub, { fontSize: 30 }, { marginTop: 0 }, { padding: 0 }, { textAlign: 'center' }, { fontWeight: 800 }]}>{'\n'}✦ Habit Garden ✦</Text>
       </View>
 
       {/* ── White body card ── */}
