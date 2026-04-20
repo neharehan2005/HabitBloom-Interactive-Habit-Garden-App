@@ -125,7 +125,5 @@ Each habit progresses through 4 growth stages based on your streak vs. goal dura
 
 
 <div align="center">
-  Made with 💚 and a lot of daily habits
-  <br/>
   <i>Plant a seed today. Bloom tomorrow.</i>
 </div>
