@@ -145,7 +145,7 @@ Then scan the QR code with **Expo Go** (iOS/Android) or press `i` for iOS simula
 
 ```
 Add a Habit → Water it Daily → Watch it Grow → Bloom at 100%
-   🪴              💧              🌿              🌸
+   🌱              💧              🌿              🌸
 ```
 
 1. **Plant a seed** — create a habit with a name and goal duration
@@ -153,17 +153,6 @@ Add a Habit → Water it Daily → Watch it Grow → Bloom at 100%
 3. **Watch it grow** — your plant visually evolves through 4 stages
 4. **Bloom** — reach 100% of your goal and your plant fully blooms 🌸
 
----
-
-## 🔮 Roadmap
-
-- [ ] Social garden sharing with friends
-- [ ] Habit analytics dashboard with charts
-- [ ] Push notifications for daily reminders
-- [ ] Custom plant types and garden themes
-- [ ] Offline support with local persistence
-
----
 
 <div align="center">
   <i>Plant a seed today. Bloom tomorrow.</i>
