@@ -6,18 +6,65 @@ HabitBloom is a cross-platform mobile app that gamifies personal growth. Every h
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-| Feature | Description |
-|---|---|
-| 🌱 **Virtual Garden** | Each habit becomes a plant that grows through 4 stages as your streak builds |
-| 💧 **Daily Watering** | Mark habits complete each day to keep your plants alive |
-| 🔥 **Streak Tracking** | Visual progress bars and growth stages reflect your consistency |
-| 🌤️ **Live Weather Theme** | Garden background adapts to real local weather — sunny, rainy, night, and more |
-| 💬 **Motivational Quotes** | Daily inspiration to keep you going |
-| 🎨 **Theme Switching** | Light and dark mode with accent color customization |
-| ☁️ **Cloud Sync** | Habits and progress persist across sessions via Firebase Firestore |
-| 🔐 **Authentication** | Secure login and signup with Firebase Auth |
+### 🌿 Habit Management
+- Add, edit, and delete habits with ease
+- Clean, intuitive interface designed for daily use
+- Duplicate detection to keep your garden organized
+
+### 🔥 Streak Tracking System
+- Track daily progress and streak consistency
+- Visual progress bars reflect how close you are to your goal
+- Encourages long-term discipline through visible momentum
+
+### 🌸 Interactive Garden-Based Tracking
+- Every habit becomes a living plant in your personal garden
+- Progress is visualized through a full garden ecosystem
+- Plants grow through **4 distinct stages** as your streak builds:
+
+  | Stage | Emoji | Progress |
+  |---|---|---|
+  | Seedling | 🌱 | 0 – 49% |
+  | Sprout | 🌿 | 50 – 74% |
+  | Tree | 🌳 | 75 – 99% |
+  | Bloomed | 🌸 | 100% |
+
+- Creates an emotional connection between your effort and visible growth
+
+### 🎬 Animations & Micro-Interactions
+- Smooth transitions and animated components throughout
+- Visual feedback when completing (watering) habits
+- Staggered card entrances, and floating particles
+- Enhances user engagement and overall app feel
+
+### 🌦️ Real-Time Weather Background
+- Dynamic garden background powered by live weather data
+- Environment adapts to real-world conditions — sunny, rainy, cloudy, night, and evening
+- Animated elements: twinkling stars, fireflies, falling rain, floating moon
+- Creates an immersive, ever-changing experience that reflects the real world
+
+### 📊 Statistics Screen
+- Dedicated stats dashboard for habit insights
+- Tracks:
+  - Habit completion rates
+  - Streak performance over time
+  - Overall progress across all habits
+- Helps users analyze patterns and improve consistency
+
+### 💬 Motivational Quotes
+- API-powered dynamic quotes refreshed daily
+- Encourages positivity and consistency
+- Displayed contextually within the garden experience
+
+### 🎨 Theme Customization
+- Light and dark mode support
+- Accent color theming for a personalized UI experience
+
+### 📱 Mobile-First Design
+- Fully optimized for iOS and Android
+- Smooth, responsive navigation using Expo Router
+- Designed for one-handed daily use
 
 ---
 
@@ -98,17 +145,13 @@ Then scan the QR code with **Expo Go** (iOS/Android) or press `i` for iOS simula
 
 ```
 Add a Habit → Water it Daily → Watch it Grow → Bloom at 100%
-   🌱             💧              🌿              🌸
+   🪴              💧              🌿              🌸
 ```
 
-Each habit progresses through 4 growth stages based on your streak vs. goal duration:
-
-| Stage | Emoji | Progress |
-|---|---|---|
-| Seedling | 🌱 | 0–49% |
-| Sprout | 🌿 | 50–74% |
-| Tree | 🌳 | 75–99% |
-| Bloomed | 🌸 | 100% |
+1. **Plant a seed** — create a habit with a name and goal duration
+2. **Water daily** — mark it complete each day to build your streak
+3. **Watch it grow** — your plant visually evolves through 4 stages
+4. **Bloom** — reach 100% of your goal and your plant fully blooms 🌸
 
 ---
 
@@ -121,8 +164,6 @@ Each habit progresses through 4 growth stages based on your streak vs. goal dura
 - [ ] Offline support with local persistence
 
 ---
-
-
 
 <div align="center">
   <i>Plant a seed today. Bloom tomorrow.</i>
