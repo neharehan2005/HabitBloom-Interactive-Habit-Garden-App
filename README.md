@@ -1,94 +1,131 @@
-# 🌱 HabitBloom — Interactive Habit Garden App
+# 🌸 HabitBloom — Interactive Habit Garden App
 
-## Description
+> *Turn your daily habits into a thriving virtual garden.*
 
-**HabitBloom** is an interactive habit-tracking app that gamifies personal growth by turning your daily habits into a virtual garden. Each habit you complete nurtures plants in your garden, visually representing your progress and encouraging consistency.
+HabitBloom is a cross-platform mobile app that gamifies personal growth. Every habit you complete waters and grows a plant in your garden — making consistency visible, rewarding, and fun.
 
-The app combines **habit management, streak tracking, and motivation** with an immersive, playful interface to make habit building enjoyable and rewarding.
+---
 
+## ✨ Features
 
+| Feature | Description |
+|---|---|
+| 🌱 **Virtual Garden** | Each habit becomes a plant that grows through 4 stages as your streak builds |
+| 💧 **Daily Watering** | Mark habits complete each day to keep your plants alive |
+| 🔥 **Streak Tracking** | Visual progress bars and growth stages reflect your consistency |
+| 🌤️ **Live Weather Theme** | Garden background adapts to real local weather — sunny, rainy, night, and more |
+| 💬 **Motivational Quotes** | Daily inspiration to keep you going |
+| 🎨 **Theme Switching** | Light and dark mode with accent color customization |
+| ☁️ **Cloud Sync** | Habits and progress persist across sessions via Firebase Firestore |
+| 🔐 **Authentication** | Secure login and signup with Firebase Auth |
 
-## Features
+---
 
-* **Habit Management:** Add, edit, and delete habits with ease.
-* **Streak Tracking:** Monitor your daily habit streaks to stay motivated.
-* **Interactive Garden:** Every habit completion grows your virtual garden in real-time.
-* **Motivational Quotes:** Daily inspiration to encourage consistency.
-* **Theme Switching:** Light/Dark mode customization for personalized experience.
-* **User-Friendly Interface:** Intuitive navigation and engaging interactions.
+## 🛠️ Tech Stack
 
+| Layer | Technology |
+|---|---|
+| Framework | React Native + Expo |
+| Navigation | Expo Router (file-based) |
+| State Management | Redux Toolkit (habits, weather, user) |
+| Backend / Auth | Firebase Auth + Firestore |
+| Weather | WeatherAPI.com (live condition + temperature) |
+| UI | LinearGradient, BlurView, Animated API |
+| Icons | Expo Vector Icons (FontAwesome) |
 
+---
 
-## Tech Stack
-
-* **Frontend:** React Native, Expo
-* **State Management:** Redux (Habit tracking, streaks, user settings)
-* **API Integration:** Random motivational quotes API
-* **UI Enhancements:** LinearGradient, Animated components
-* **Navigation:** Expo Router
-
-
-
-## Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/neharehan2005/HabitBloom-Interactive-Habit-Garden-App.git
-cd HabitBloom
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Run the app on your simulator or device:
-
-```bash
-npx expo start
-```
-
-
-
-## Usage
-
-1. Launch the app on your device.
-2. Add a new habit and set your daily goal.
-3. Complete habits daily to grow your garden and maintain streaks.
-4. View motivational quotes and stats to stay inspired.
-5. Switch themes for a personalized experience.
-
-
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 HabitBloom/
-├── app/               # App screens and routes
-├── components/        # Reusable UI components
-├── store/             # Redux slices and global state
-├── assets/            # Images and icons
+├── app/
+│   ├── (tabs)/
+│   │   ├── index.tsx          # Habits list screen
+│   │   └── gardenscreen.tsx   # Interactive garden view
+│   ├── add.tsx                # Add new habit screen
+│   ├── habitDetail.tsx        # Habit detail & stats
+│   ├── login.tsx              # Login screen
+│   ├── signup.tsx             # Signup screen
+│   ├── LoginGate.tsx          # Auth guard
+│   └── _layout.tsx            # Root layout
+├── components/
+│   └── ThemeContext.tsx        # Global theme provider
+├── store/
+│   ├── habitSlice.ts           # Habit CRUD + streak logic
+│   ├── weatherSlice.ts         # Weather async thunk
+│   └── store.ts                # Redux store config
+├── utils/
+│   └── habitUtils.ts           # Shared growth stage logic + emojis
+├── assets/                     # Images and icons
+├── firebaseConfig.ts           # Firebase initialization
 ├── package.json
 └── README.md
 ```
 
+---
 
-## Contribution
+## 🚀 Getting Started
 
-Contributions are welcome!
+### Prerequisites
 
-1. Fork the repository.
-2. Create your feature branch: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -m "Add feature"`.
-4. Push to the branch: `git push origin feature-name`.
-5. Open a Pull Request.
+- Node.js 18+
+- Expo CLI (`npm install -g expo-cli`)
+- A Firebase project with **Authentication** and **Firestore** enabled
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/neharehan2005/HabitBloom-Interactive-Habit-Garden-App.git
+cd HabitBloom
+
+# 2. Install dependencies
+npm install
+
+# 3. Add your Firebase config
+# Edit firebaseConfig.ts with your project credentials
+
+# 4. Start the development server
+npx expo start
+```
+
+Then scan the QR code with **Expo Go** (iOS/Android) or press `i` for iOS simulator / `a` for Android emulator.
+
+---
+
+## 🌿 How It Works
+
+```
+Add a Habit → Water it Daily → Watch it Grow → Bloom at 100%
+   🌱             💧              🌿              🌸
+```
+
+Each habit progresses through 4 growth stages based on your streak vs. goal duration:
+
+| Stage | Emoji | Progress |
+|---|---|---|
+| Seedling | 🌱 | 0–49% |
+| Sprout | 🌿 | 50–74% |
+| Tree | 🌳 | 75–99% |
+| Bloomed | 🌸 | 100% |
+
+---
+
+## 🔮 Roadmap
+
+- [ ] Social garden sharing with friends
+- [ ] Habit analytics dashboard with charts
+- [ ] Push notifications for daily reminders
+- [ ] Custom plant types and garden themes
+- [ ] Offline support with local persistence
+
+---
 
 
-## Future Enhancements
 
-* Integrate **social features** to share your garden with friends.
-* Implement **analytics dashboard** for habit trends.
-* Expand **garden elements and animations** for a more immersive experience.
-
+<div align="center">
+  Made with 💚 and a lot of daily habits
+  <br/>
+  <i>Plant a seed today. Bloom tomorrow.</i>
+</div>
