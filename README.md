@@ -58,7 +58,6 @@ HabitBloom is a cross-platform mobile app that gamifies personal growth. Every h
 - Displayed contextually within the garden experience
 
 ### 🎨 Theme Customization
-- Light and dark mode support
 - Accent color theming for a personalized UI experience
 
 ### 📱 Mobile-First Design
